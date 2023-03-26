@@ -1,7 +1,49 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const {Configuration, OpenAIApi} = require("openai")
 
+const config = new Configuration( {
+  apiKey: process.env.OPENAI_API_KEY
+})
+
+const x = {
+  "name": "students",
+  "nameInDb": "students",
+  "operations": ["Create", "Filter"],
+  "fields": [
+    {
+      "name": "studentId",
+      "dbColumnName": "student_id",
+      "dataType": "id",
+      "fieldType": "generatedPrimaryKey",
+      "listName": null
+    },
+    {
+      "name": "firstName",
+      "dbColumnName": "first_name",
+      "dataType": "name",
+      "fieldType": "requiredData",
+      "listName": null
+    },
+    {
+      "name": "lastName",
+      "dbColumnName": "last_name",
+      "dataType": "name",
+      "fieldType": "requiredData",
+      "listName": null
+    },
+    {
+      "name": "gender",
+      "dbColumnName": "gender",
+      "dataType": "gender",
+      "fieldType": "requiredData",
+      "listName": "gender"
+    }
+  ]
+}
+
+const openai = new OpenAIApi(config)
 const app = express();
 
 app.use((req, res, next) => {
@@ -88,6 +130,19 @@ app.get('/download-files', (req, res) => {
   });
 });
 
+const runPrompt = async () => {
+  const messages = [{"role": "user","content":" Now give me a metadev-record for employees with fields first name and last name.Only respond with code as plain text without code block syntax around it. "}] ;
+  const response = await openai.ChatCompletion.create({
+    model:"davinci:ft-personal-2023-03-25-23-38-48",
+    messages:messages,
+    max_tokens:2048,
+    temperature: 0
+  });
+  console.log(response.data.choices[0])
+}
+
+console.log(process.env.OPENAI_API_KEY)
+runPrompt();
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
