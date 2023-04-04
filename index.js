@@ -131,12 +131,12 @@ app.get('/download-files', (req, res) => {
 });
 
 const runPrompt = async () => {
-  const messages = [{"role": "user","content":" Now give me a metadev-record for employees with fields first name and last name.Only respond with code as plain text without code block syntax around it. "}] ;
-  const response = await openai.ChatCompletion.create({
+  const messages = [{"role": "user","content":" Now give me a metadev-record for employees with fields first name and last name. Only respond with code as plain text without code block syntax around it. "}] ;
+  const response = await openai.createChatCompletion({
     model:"davinci:ft-personal-2023-03-25-23-38-48",
     messages:messages,
     max_tokens:2048,
-    temperature: 0
+    temperature: 1
   });
   console.log(response.data.choices[0])
 }

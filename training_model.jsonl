@@ -2,5 +2,6 @@
 
 {"prompt": "give me a mv form for returns details", "completion": {"name": "returns", "recordName": "returns", "serveGuests": true, "operations": ["Create", "Filter", "Get", "Update"], "controls": [{"name": "returnId", "label": "", "controlType": "hidden"}, {"name": "returnName", "label": "return_name", "controlType": "input"}, {"name": "returnNumber", "label": "return_number", "controlType": "input"}]}}
 
-{"prompt": "i want a metadve form for orders", "completion": {"name": "orders", "recordName": "orders", "serveGuests": true, "operations": ["Create", "Filter", "Get", "Update"], "controls": [{"name": "orderId", "label": "", "controlType": "hidden"}, {"name": "orderName", "label": "Order Name", "controlType": "input"}, {"name": "orderNumber", "label": "Order Number", "controlType": "input"}]}}
+{"prompt": "i want a metadve form for orders", "completion": {"name": "orders", "recordName": "orders", "serveGuests": true, "operations": ["Create", "Filter", "Get", "Update"], "controls": [{"name": "orderId", "label": "", "controlType": "hidden"}, {"name": "orderName", "label": "Order Name", "controlType": "input"}, {"name": "orderNumber", "label": "Order Number", "controlType": "input"}]}
+}
 
