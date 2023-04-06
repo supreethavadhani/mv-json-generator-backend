@@ -1,48 +1,19 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const {Configuration, OpenAIApi} = require("openai")
+const {
+  Configuration,
+  OpenAIApi
+} = require("openai")
 
-const config = new Configuration( {
+const config = new Configuration({
   apiKey: process.env.OPENAI_API_KEY
 })
 
-const x = {
-  "name": "students",
-  "nameInDb": "students",
-  "operations": ["Create", "Filter"],
-  "fields": [
-    {
-      "name": "studentId",
-      "dbColumnName": "student_id",
-      "dataType": "id",
-      "fieldType": "generatedPrimaryKey",
-      "listName": null
-    },
-    {
-      "name": "firstName",
-      "dbColumnName": "first_name",
-      "dataType": "name",
-      "fieldType": "requiredData",
-      "listName": null
-    },
-    {
-      "name": "lastName",
-      "dbColumnName": "last_name",
-      "dataType": "name",
-      "fieldType": "requiredData",
-      "listName": null
-    },
-    {
-      "name": "gender",
-      "dbColumnName": "gender",
-      "dataType": "gender",
-      "fieldType": "requiredData",
-      "listName": "gender"
-    }
-  ]
-}
-
+const vendorRecord = "{\n  \"name\": \"students\",\n  \"nameInDb\": \"students\",\n  \"operations\": [\"Create\", \"Filter\"],\n  \"fields\": [\n    {\n      \"name\": \"studentId\",\n      \"dbColumnName\": \"student_id\",\n      \"dataType\": \"id\",\n      \"fieldType\": \"generatedPrimaryKey\",\n      \"listName\": null\n    },\n    {\n      \"name\": \"firstName\",\n      \"dbColumnName\": \"first_name\",\n      \"dataType\": \"name\",\n      \"fieldType\": \"requiredData\",\n      \"listName\": null\n    },\n    {\n      \"name\": \"lastName\",\n      \"dbColumnName\": \"last_name\",\n      \"dataType\": \"name\",\n      \"fieldType\": \"requiredData\",\n      \"listName\": null\n    },\n    {\n      \"name\": \"gender\",\n      \"dbColumnName\": \"gender\",\n      \"dataType\": \"gender\",\n      \"fieldType\": \"requiredData\",\n      \"listName\": \"gender\"\n    }\n  ]\n}";
+const vendorForm = "{\"name\": \"vendors\", \"recordName\": \"vendors\", \"serveGuests\": true, \"operations\": [\"Create\", \"Filter\", \"Get\", \"Update\"], \"controls\": [{\"name\": \"vendorId\", \"label\": \"\", \"controlType\": \"hidden\"}, {\"name\": \"vendorName\", \"label\": \"Name\", \"controlType\": \"input\"}, {\"name\": \"vendorNumber\", \"label\": \"Number\", \"controlType\": \"textarea\"}, {\"name\": \"vendorGender\", \"label\": \"Gender\", \"controlType\": \"dropdown\"}"
+const returnForm = "{\"name\": \"returns\", \"recordName\": \"returns\", \"serveGuests\": true, \"operations\": [\"Create\", \"Filter\", \"Get\", \"Update\"], \"controls\": [{\"name\": \"returnId\", \"label\": \"\", \"controlType\": \"hidden\"}, {\"name\": \"returnName\", \"label\": \"return_name\", \"controlType\": \"input\"}, {\"name\": \"returnNumber\", \"label\": \"return_number\", \"controlType\": \"input\"}";
+const returnRecord = "{\n    \"name\": \"returns\",\n    \"nameInDb\": \"returns\",\n    \"operations\": [\"Create\", \"Filter\",\"Get\",\"Update\"],\n    \"fields\": [{\n        \"name\": \"returnId\",\n        \"dbColumnName\": \"return_id\",\n        \"dataType\": \"id\",\n        \"fieldType\": \"generatedPrimaryKey\",\n        \"listName\": null\n    }, {\n        \"name\": \"returnName\",\n        \"dbColumnName\": \"return_name\",\n        \"dataType\": \"name\",\n        \"fieldType\": \"requiredData\",\n        \"listName\": null\n    }, {\n        \"name\": \"returnNumber\",\n        \"dbColumnName\": \"return_number\",\n        \"dataType\": \"integer\",\n        \"fieldType\": \"requiredData\",\n        \"listName\": null\n    }]\n}"
 const openai = new OpenAIApi(config)
 const app = express();
 
@@ -92,7 +63,7 @@ app.get('/json-files', (req, res) => {
             jsonObjectsBySuffix.template.push(jsonObject);
           } else if (suffix === 'rec') {
             jsonObjectsBySuffix.record.push(jsonObject);
-          } 
+          }
         }
       }
     });
@@ -130,19 +101,23 @@ app.get('/download-files', (req, res) => {
   });
 });
 
-const runPrompt = async () => {
-  const messages = [{"role": "user","content":" Now give me a metadev-record for employees with fields first name and last name. Only respond with code as plain text without code block syntax around it. "}] ;
-  const response = await openai.createChatCompletion({
-    model:"davinci:ft-personal-2023-03-25-23-38-48",
-    messages:messages,
-    max_tokens:2048,
+app.get('/openai-form', async (req, res) => {
+  const formName = req.query.formName;
+  const messages = [{
+    "role": "user",
+    "content": " the metadev form for vendors is "+vendorForm+" and the metadev record for vendor is" + vendorRecord+". the metadev form for returns"+ returnForm +" and the metadev returns record is" + returnRecord +". Now for the form" +formName+ " I want you to give me the metadev record and form. you need to respond with one and only one json contaning the generated metadev form and record with keys as form and record. Only respond with code as plain text without code block syntax around it. Your response should and must be only one json. your response should be parsable into a json"
+  }];
+  const responseForm = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    messages: messages,
+    max_tokens: 2048,
     temperature: 1
   });
-  console.log(response.data.choices[0])
-}
 
-console.log(process.env.OPENAI_API_KEY)
-runPrompt();
+  console.log(responseForm.data.choices[0].message.content)
+  res.json(JSON.parse(responseForm.data.choices[0].message.content))
+})
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
